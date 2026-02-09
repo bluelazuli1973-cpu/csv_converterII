@@ -27,7 +27,7 @@ def load_user(user_id: str):
 
 
 class Upload(db.Model):
-    __tablename__ = "upload"
+    __tablename__ = "uploads"
     id = db.Column(db.Integer, primary_key=True)
     original_filename = db.Column(db.String(512), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
@@ -68,5 +68,5 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)           # Belopp (can be +/-)
     booked_balance = db.Column(db.Float, nullable=True)    # Bokfört saldo
 
-    upload_id = db.Column(db.Integer, db.ForeignKey("upload.id"), nullable=False, index=True)
+    upload_id = db.Column(db.Integer, db.ForeignKey("uploads.id"), nullable=False, index=True)
     upload = db.relationship("Upload", back_populates="transactions")
