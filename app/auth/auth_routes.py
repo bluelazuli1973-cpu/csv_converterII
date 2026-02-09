@@ -21,10 +21,10 @@ def register_post():
         flash("Email and password are required.", "error")
         return redirect(url_for("auth.register"))
 
-    existing = db.session.execute(db.select(User).where(User.email == email)).scalar_one_or_none()
-    if existing:
-        flash("That email is already registered. Please log in.", "error")
-        return redirect(url_for("auth.login"))
+#    existing = db.session.execute(db.select(User).where(User.email == email)).scalar_one_or_none()
+#    if existing:
+#        flash("That email is already registered. Please log in.", "error")
+#        return redirect(url_for("auth.login"))
 
     user = User(email=email)
     user.set_password(password)

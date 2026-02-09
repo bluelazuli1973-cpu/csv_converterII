@@ -2,7 +2,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from ..extensions import db
-from ..models import DataPoint, Upload
+from ..models import Upload, Transaction
 from .services import parse_csv_to_dataframe
 
 ingest_bp = Blueprint("ingest", __name__)
@@ -43,16 +43,32 @@ def upload_post():
         row_count=int(len(df)),
     )
     db.session.add(upload_row)
-    db.session.flush()  # get upload_row.id without committing yet
+    db.session.flush()  # get upload_row.id
 
-    points = [
-        DataPoint(day=row["date"], metric=row["metric"], value=float(row["value"]), upload_id=upload_row.id)
-        for _, row in df.iterrows()
-    ]
-    db.session.add_all(points)
+    txs = []
+    for _, r in df.iterrows():
+        txs.append(
+            Transaction(
+                row_number=int(r["Radnummer"]),
+                clearing_number=str(r["Clearingnummer"]).strip(),
+                account_number=str(r["Kontonummer"]).strip(),
+                product=str(r["Produkt"]).strip() if str(r["Produkt"]).strip() != "" else None,
+                currency=str(r["Valuta"]).strip() if str(r["Valuta"]).strip() != "" else None,
+                booking_day=r["Bokföringsdag"],
+                transaction_day=r["Transaktionsdag"],
+                value_day=r["Valutadag"],
+                reference=str(r["Referens"]).strip() if str(r["Referens"]).strip() != "" else None,
+                description=str(r["Beskrivning"]).strip() if str(r["Beskrivning"]).strip() != "" else None,
+                amount=float(r["Belopp"]),
+                booked_balance=float(r["Bokfört saldo"]) if r["Bokfört saldo"] is not None else None,
+                upload_id=upload_row.id,
+            )
+        )
+
+    db.session.add_all(txs)
     db.session.commit()
 
-    flash(f"Uploaded {len(points)} rows from {file.filename}", "success")
+    flash(f"Uploaded {len(txs)} rows from {file.filename}", "success")
     return redirect(url_for("ingest.uploads"))
 
 
