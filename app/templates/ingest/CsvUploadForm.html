@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Upload CSV</h2>
+    <p class="muted">Expected columns: <code>date</code>, <code>metric</code>, <code>value</code></p>
+
+    <form method="post" action="{{ url_for('ingest.upload_post') }}" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".csv,text/csv" required />
+      <button type="submit">Upload</button>
+    </form>
+
+    <hr/>
+    <p class="muted">
+      Next: we can add a nicer drag-and-drop zone and preview/validation report before committing.
+    </p>
+  </div>
+{% endblock %}

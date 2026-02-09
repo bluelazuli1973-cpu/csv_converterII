@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ title or "CSV BI Portal" }}</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; }
+      nav a { margin-right: 12px; }
+      .flash { padding: 10px; margin: 10px 0; border-radius: 6px; }
+      .flash.error { background: #ffe1e1; }
+      .flash.success { background: #e6ffea; }
+      .card { padding: 16px; border: 1px solid #ddd; border-radius: 8px; max-width: 900px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
+      .muted { color: #666; font-size: 0.95em; }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="{{ url_for('ingest.upload') }}">Upload</a>
+      <a href="{{ url_for('ingest.uploads') }}">Upload History</a>
+      <a href="{{ url_for('analytics.trend') }}">Trends</a>
+      <span style="float:right;">
+        {% if current_user.is_authenticated %}
+          {{ current_user.email }} |
+          <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+        {% endif %}
+      </span>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </body>
+</html>

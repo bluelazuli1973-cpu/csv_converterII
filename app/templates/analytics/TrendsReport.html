@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Trends</h2>
+
+    <h3>Total value per day</h3>
+    {% if per_day %}
+      <table>
+        <thead><tr><th>Date</th><th>Total</th></tr></thead>
+        <tbody>
+          {% for day, total in per_day %}
+            <tr><td>{{ day }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No data yet—upload a CSV first.</p>
+    {% endif %}
+
+    <h3 style="margin-top:18px;">Totals by metric</h3>
+    {% if per_metric %}
+      <table>
+        <thead><tr><th>Metric</th><th>Total</th></tr></thead>
+        <tbody>
+          {% for metric, total in per_metric %}
+            <tr><td>{{ metric }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+{% endblock %}

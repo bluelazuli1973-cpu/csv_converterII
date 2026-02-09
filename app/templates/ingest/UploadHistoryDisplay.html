@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h2>Your Uploads</h2>
+    {% if uploads %}
+      <table>
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Filename</th>
+            <th>Rows</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in uploads %}
+            <tr>
+              <td>{{ u.uploaded_at }}</td>
+              <td>{{ u.original_filename }}</td>
+              <td>{{ u.row_count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">No uploads yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}
