@@ -50,6 +50,7 @@ def read_csv_and_convert(filepath, skip_first_row=False, delimiter=",", convert_
         na_values (Iterable[str] | None): Values considered missing, e.g. {"", "NA"}.
 
     Returns:
+        if the second row includes the header the first item in the list will be the header of the other columns
         list[list[Any]]: Rows as lists of values with optional type conversion.
     """
     data = []

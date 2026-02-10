@@ -1,9 +1,53 @@
 import csv
 import io
 from difflib import SequenceMatcher
+from pathlib import Path
 
 import pandas as pd
 
+"""
+read_whole_line_quoted_csv: Can handle swedish csv where each line is quoted
+"""
+def read_whole_line_quoted_csv(path: str, *, encoding: str = "windows-1252", sep: str = ",") -> pd.DataFrame:
+    with open(path, "r", encoding=encoding, newline="") as f:
+        lines = f.read().splitlines()
+
+    repaired = []
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if i > 0 and len(s) >= 2 and s[0] == '"' and s[-1] == '"':
+            # Remove the outer quotes; keep inner content
+            s = s[1:-1]
+        repaired.append(s)
+
+    return pd.read_csv(io.StringIO("\n".join(repaired)), sep=sep)
+
+# Example:
+# df = read_whole_line_quoted_csv("output.csv")
+# print(df.columns, df.head())
+
+def strip_quotes_from_csv(input_file, output_file,enc='windows-1252'):
+    """
+    Read a CSV file and remove all double quotes from the data,
+    then write to a new CSV file.
+
+    Args:
+        input_file: Path to the input CSV file
+        output_file: Path to the output CSV file
+    """
+    with open(input_file, 'r', encoding=enc) as infile, \
+            open(output_file, 'w', encoding=enc, newline='') as outfile:
+        reader = csv.reader(infile)
+        writer = csv.writer(outfile, quoting=csv.QUOTE_MINIMAL, escapechar='\\')
+
+        for row in reader:
+            # Strip quotes from each field in the row
+            cleaned_row = [field.replace('"', '') for field in row]
+            writer.writerow(cleaned_row)
+
+
+# Example usage:
+# strip_quotes_from_csv('input.csv', 'output.csv')
 
 def _read_all_bytes(source) -> bytes:
     """
@@ -11,66 +55,103 @@ def _read_all_bytes(source) -> bytes:
     Returns file content as bytes.
     """
     if hasattr(source, "read"):
+        try:
+            if hasattr(source, "seek"):
+                source.seek(0)
+        except Exception:
+            pass
+
         data = source.read()
         return data if isinstance(data, (bytes, bytearray)) else str(data).encode("utf-8", errors="replace")
+
     with open(source, "rb") as f:
         return f.read()
 
 
-def _sniff_delimiter(text_sample: str, fallback=(",", ";", "\t", "|")) -> str | None:
-    try:
-        dialect = csv.Sniffer().sniff(text_sample, delimiters="".join(fallback))
-        return dialect.delimiter
-    except csv.Error:
-        return None
-
-
-def read_flexible_csv(source) -> pd.DataFrame:
+def _extract_excel_sep_hint(text: str) -> tuple[str | None, int]:
     """
-    Reads a CSV from a path or file-like object with flexible encoding+delimiter handling.
-    Raises ValueError with a useful message if it cannot parse.
+    Detect Excel-style 'sep=;' hint on the first non-empty line.
+    Returns: (sep_hint or None, skiprows)
+    """
+    # Normalize BOM in case decoding produced it
+    if text.startswith("\ufeff"):
+        text = text.lstrip("\ufeff")
+
+    lines = text.splitlines()
+    for i, ln in enumerate(lines[:5]):  # only need the first few lines
+        s = ln.strip()
+        if not s:
+            continue
+        if s.lower().startswith("sep=") and len(s) >= 5:
+            return s[4], i + 1  # sep char, and skip rows up to and including this line
+        break
+    return None, 0
+
+
+def read_csv_explicit(
+    source,
+    *,
+    encoding: str = "windows-1252",
+    sep: str = ",",
+    header: int | None = 0,
+    quotechar: str = '"',
+) -> pd.DataFrame:
+    """
+    Read a CSV using explicit encoding + separator (no guessing).
+    Also supports Excel 'sep=;' hint line by auto-skipping it.
+
+    If parsing still results in 1 column, raises a helpful error.
     """
     raw = _read_all_bytes(source)
     if not raw:
         raise ValueError("CSV is empty.")
 
-    encodings_to_try = ("utf-8-sig", "utf-8", "cp1252", "latin1")
-    delimiters_to_try = [",", ";", "\t", "|"]
+    try:
+        text = raw.decode(encoding)
+    except UnicodeDecodeError as e:
+        raise ValueError(
+            f"Could not decode CSV with encoding={encoding!r}. "
+            "Common encodings: 'windows-1252' (Excel on Windows), 'utf-8-sig'."
+        ) from e
 
-    last_error: Exception | None = None
+    sep_hint, skiprows = _extract_excel_sep_hint(text)
+    if sep_hint is not None:
+        # If the file declares its delimiter, trust it.
+        sep = sep_hint
 
-    for enc in encodings_to_try:
-        try:
-            text = raw.decode(enc)
-        except UnicodeDecodeError as e:
-            last_error = e
-            continue
+    df = pd.read_csv(
+        io.StringIO(text),
+        sep=sep,
+        header=header,
+        skiprows=skiprows,
+        engine="python",
+        quotechar=quotechar,
+        doublequote=True,
+        skip_blank_lines=True,
+    )
+    print("readin csv with sep =", sep)
+    print(df.head())
 
-        # Use a small sample for delimiter sniffing
-        sample = text[:50_000]
-        sniffed = _sniff_delimiter(sample, fallback=tuple(delimiters_to_try))
-        delimiter_order = ([sniffed] if sniffed else []) + [d for d in delimiters_to_try if d != sniffed]
+    # If we still only got one column, it's almost certainly the wrong sep (or not delimiter-separated data).
+    if len(df.columns) == 1:
+        col0 = df.columns[0]
+        sample_vals = df[col0].dropna().astype(str).head(20).tolist()
 
-        for delim in delimiter_order:
-            try:
-                df = pd.read_csv(io.StringIO(text), sep=delim)
-                # Heuristic: a real CSV should produce more than 1 column
-                if len(df.columns) > 1:
-                    return df
-            except (pd.errors.ParserError, UnicodeError, ValueError) as e:
-                last_error = e
-                continue
+        # If separator appears inside the values, we're not splitting correctly.
+        if any(sep in v for v in sample_vals):
+            raise ValueError(
+                "Still parsed into a single column.\n"
+                f"Detected/used sep={sep!r}, encoding={encoding!r}, skipped_rows={skiprows}.\n"
+                "This usually means the real delimiter is different, or the file is not a normal CSV.\n"
+                "Next step: open the file in a text editor and check what character is between fields "
+                "(common: ';', ',', '\\t')."
+            )
 
-    raise ValueError(
-        "Could not decode/parse the CSV. "
-        "If the file comes from Excel on Windows, try exporting/saving it as 'CSV UTF-8'."
-    ) from last_error
+    return df
 
 
+# ... existing code ...
 def normalize_columns(df: pd.DataFrame, field_mapping: dict[str, list[str]], threshold: float = 0.80) -> pd.DataFrame:
-    """
-    Map columns to standard names using stdlib fuzzy matching (no external deps).
-    """
     def similarity(a: str, b: str) -> float:
         return SequenceMatcher(None, a, b).ratio()
 
@@ -95,19 +176,13 @@ def normalize_columns(df: pd.DataFrame, field_mapping: dict[str, list[str]], thr
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    # Strip whitespace from all string columns
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
-    # Standardize date formats if present
     date_columns = {"date", "created_at", "timestamp"}
     for col in df.columns:
         if str(col).lower() in date_columns:
             df[col] = pd.to_datetime(df[col], errors="coerce")
 
-    # Remove duplicates
     df = df.drop_duplicates()
-
-    # Drop rows where all values are null
     df = df.dropna(how="all")
-
     return df

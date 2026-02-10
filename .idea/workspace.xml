@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="627b9f9a-9cd5-4c87-a943-a8c0292e4bb2" name="Changes" comment="renamed upload to uploads">
-      <change afterPath="$PROJECT_DIR$/app/ingest/field_mapping.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/ingest/flexible_csv_reader_utility.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="627b9f9a-9cd5-4c87-a943-a8c0292e4bb2" name="Changes" comment="adding a generic csv reader utility">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/ingest/read_csv_format.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ingest/csv_read_and_convert.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/csv_read_and_convert.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ingest/field_mapping.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/field_mapping.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ingest/flexible_csv_reader_utility.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/flexible_csv_reader_utility.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,7 +19,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="34" />
+    <option name="cachedIndexableFilesCount" value="40" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
@@ -65,34 +69,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "FastAPI.CSV_ConverterII.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.CSV_ConverterII.executor": "Run",
-    "Python.Flask main.executor": "Run",
-    "Python.field_mapping.executor": "Debug",
-    "Python.main.executor": "Debug",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;FastAPI.CSV_ConverterII.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.CSV_ConverterII.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Flask main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.field_mapping.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\ingest" />
@@ -102,12 +106,15 @@
       <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="FastAPI.CSV_ConverterII">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python">
       <module name="CSV_ConverterII" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="SDK_NAME" value="Python 3.14 (CSV_ConverterII)" />
       <option name="WORKING_DIRECTORY" value="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII" />
@@ -167,7 +174,8 @@
       <workItem from="1770633843496" duration="25000" />
       <workItem from="1770633900434" duration="454000" />
       <workItem from="1770634360485" duration="2150000" />
-      <workItem from="1770641214858" duration="7044000" />
+      <workItem from="1770641214858" duration="7463000" />
+      <workItem from="1770651026440" duration="20174000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Project Setup and Basic">
       <option name="closed" value="true" />
@@ -209,7 +217,23 @@
       <option name="project" value="LOCAL" />
       <updated>1770644338361</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="adding a generic csv reader utility">
+      <option name="closed" value="true" />
+      <created>1770650441101</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1770650441101</updated>
+    </task>
+    <task id="LOCAL-00007" summary="adding a generic csv reader utility">
+      <option name="closed" value="true" />
+      <created>1770659524544</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1770659524544</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -219,7 +243,8 @@
     <MESSAGE value="Initial Project Setup and Basic" />
     <MESSAGE value="modified the schema with transactions" />
     <MESSAGE value="renamed upload to uploads" />
-    <option name="LAST_COMMIT_MESSAGE" value="renamed upload to uploads" />
+    <MESSAGE value="adding a generic csv reader utility" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding a generic csv reader utility" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -261,7 +286,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/ingest/field_mapping.py</url>
-          <line>13</line>
+          <line>14</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>

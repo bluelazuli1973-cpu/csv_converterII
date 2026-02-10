@@ -44,29 +44,21 @@ class Upload(db.Model):
 class Transaction(db.Model):
     """
     CSV schema (bank transactions) based on provided header:
-    Radnummer,Clearingnummer,Kontonummer,Produkt,Valuta,
-    Bokföringsdag,Transaktionsdag,Valutadag,Referens,Beskrivning,
-    Belopp,Bokfört saldo
+    Valuta, Bokningsdag, Transaktionsdag, Valutadag, Plats, Referens, Belopp
     """
     __tablename__ = "transactions"
     id = db.Column(db.Integer, primary_key=True)
 
-    row_number = db.Column(db.Integer, nullable=False)
-    clearing_number = db.Column(db.String(32), nullable=False, index=True)
-    account_number = db.Column(db.String(64), nullable=False, index=True)
+    currency = db.Column(db.String(8), nullable=True, index=True)           # Currency
 
-    product = db.Column(db.String(128), nullable=True)
-    currency = db.Column(db.String(8), nullable=True, index=True)
+    booking_day = db.Column(db.Date, nullable=True, index=True)             # Bokföringsdag
+    transaction_day = db.Column(db.Date, nullable=True, index=True)         # Transaktionsdag
+    currency_day = db.Column(db.Date, nullable=True, index=True)            # Valutadag day of currency conversion
 
-    booking_day = db.Column(db.Date, nullable=True, index=True)        # Bokföringsdag
-    transaction_day = db.Column(db.Date, nullable=True, index=True)    # Transaktionsdag
-    value_day = db.Column(db.Date, nullable=True, index=True)          # Valutadag
+    place_purchase = db.Column(db.String(256), nullable=True, index=True)    #Place of purchase
+    description = db.Column(db.String(512), nullable=True)                   #Reference
 
-    reference = db.Column(db.String(256), nullable=True, index=True)
-    description = db.Column(db.String(512), nullable=True)
-
-    amount = db.Column(db.Float, nullable=False)           # Belopp (can be +/-)
-    booked_balance = db.Column(db.Float, nullable=True)    # Bokfört saldo
+    amount = db.Column(db.Float, nullable=False)                               # Belopp (can be +/-)
 
     upload_id = db.Column(db.Integer, db.ForeignKey("uploads.id"), nullable=False, index=True)
     upload = db.relationship("Upload", back_populates="transactions")
