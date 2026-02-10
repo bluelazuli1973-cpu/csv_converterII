@@ -3,8 +3,41 @@
   <div class="card">
     <h2>Trends</h2>
 
-    <h3>Total value per day</h3>
+    <h3>Total amount per day (transaction date)</h3>
+
     {% if per_day %}
+      <div style="max-width: 900px;">
+        <canvas id="trendChart" height="120"></canvas>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const labels = {{ chart_labels | tojson }};
+        const values = {{ chart_values | tojson }};
+
+        const ctx = document.getElementById("trendChart").getContext("2d");
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [{
+              label: "Total amount",
+              data: values,
+              borderWidth: 2,
+              tension: 0.25,
+              pointRadius: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: false }
+            }
+          }
+        });
+      </script>
+
+      <h4 style="margin-top:18px;">Daily totals (table)</h4>
       <table>
         <thead><tr><th>Date</th><th>Total</th></tr></thead>
         <tbody>
@@ -15,18 +48,6 @@
       </table>
     {% else %}
       <p class="muted">No data yet—upload a CSV first.</p>
-    {% endif %}
-
-    <h3 style="margin-top:18px;">Totals by metric</h3>
-    {% if per_metric %}
-      <table>
-        <thead><tr><th>Metric</th><th>Total</th></tr></thead>
-        <tbody>
-          {% for metric, total in per_metric %}
-            <tr><td>{{ metric }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
     {% endif %}
   </div>
 {% endblock %}
