@@ -5,14 +5,14 @@ field_mapping = {
     'name': ['name', 'full_name', 'customer_name'],
     'phone': ['phone', 'telephone', 'tel'],
     'amount': ['Belopp', 'Priset', 'amount'],
-    'date': ['Datum', 'date', 'dag'],
+    'transactionday': ['Datum', 'date', 'Bokföringsdag'],
     'currency': ['Valuta', 'currency'],
     'reference': ['reference', 'ref', 'reference_number','Referens'],
     'description': ['description', 'Beskrivning', 'description_of_transaction']
 }
 
 # Process the CSV
-df = read_whole_line_quoted_csv("Transaktioner_2026-01-07_12-01-44.csv",skip_first_row=True)
+df = read_whole_line_quoted_csv("Transaktioner_2026-01-07_12-01-44.csv",skip_first_row=True,usecols=[4,5,8,9,10])
 print("before selecting cols")
 print(df.head())
 df = normalize_columns(df, field_mapping)

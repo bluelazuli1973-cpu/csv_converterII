@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+from app.ingest.flexible_csv_reader_utility import read_whole_line_quoted_csv
 
 
 REQUIRED_COLUMNS = ["date", "metric", "value"]
@@ -19,6 +20,16 @@ REQUIRED_COLUMNS = [
     "Bokfört saldo",
 ]
 
+FIELD_MAPPING = {
+    'email': ['email', 'e-mail', 'email_address'],
+    'name': ['name', 'full_name', 'customer_name'],
+    'phone': ['phone', 'telephone', 'tel'],
+    'amount': ['Belopp', 'Priset', 'amount'],
+    'transactionday': ['Datum', 'date', 'Bokföringsdag'],
+    'currency': ['Valuta', 'currency'],
+    'reference': ['reference', 'ref', 'reference_number','Referens'],
+    'description': ['description', 'Beskrivning', 'description_of_transaction']
+}
 
 def _parse_swedish_number(x) -> float | None:
     """
@@ -50,7 +61,7 @@ def parse_csv_to_dataframe(file_storage) -> pd.DataFrame:
     """
     # Try UTF-8 first; many Swedish exports are UTF-8 or cp1252.
     # Pandas will raise if it can't decode; we can extend this if needed.
-    df = pd.read_csv(file_storage)
+    df = read_whole_line_quoted_csv(file_storage,skip_first_row=True,encoding='windows-1252',sep=',',usecols=[4,5,8,9,10])
 
     missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
     if missing:
