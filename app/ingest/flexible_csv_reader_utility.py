@@ -8,7 +8,7 @@ import pandas as pd
 """
 read_whole_line_quoted_csv: Can handle swedish csv where each line is quoted
 """
-def read_whole_line_quoted_csv(path: str, *, encoding: str = "windows-1252", sep: str = ",") -> pd.DataFrame:
+def read_whole_line_quoted_csv(path: str, *, skip_first_row=False,encoding: str = "windows-1252", sep: str = ",") -> pd.DataFrame:
     with open(path, "r", encoding=encoding, newline="") as f:
         lines = f.read().splitlines()
 
@@ -20,7 +20,11 @@ def read_whole_line_quoted_csv(path: str, *, encoding: str = "windows-1252", sep
             s = s[1:-1]
         repaired.append(s)
 
-    return pd.read_csv(io.StringIO("\n".join(repaired)), sep=sep)
+    if skip_first_row:
+        df= pd.read_csv(io.StringIO("\n".join(repaired)), sep=sep,skiprows=[0])
+    else:
+        df= pd.read_csv(io.StringIO("\n".join(repaired)), sep=sep)
+    return df
 
 # Example:
 # df = read_whole_line_quoted_csv("output.csv")

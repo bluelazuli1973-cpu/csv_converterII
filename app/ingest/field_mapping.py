@@ -12,7 +12,7 @@ field_mapping = {
 }
 
 # Process the CSV
-df = read_whole_line_quoted_csv('Transaktioner_2026-01-07_12-01-44 - Copy.csv')
+df = read_whole_line_quoted_csv("Transaktioner_2026-01-07_12-01-44.csv",skip_first_row=True)
 print("before selecting cols")
 print(df.head())
 df = normalize_columns(df, field_mapping)
