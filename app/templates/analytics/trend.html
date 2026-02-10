@@ -6,23 +6,50 @@
     <h3>Total amount per day (transaction date)</h3>
 
     {% if per_day %}
+      <div style="display:flex; align-items:center; gap:10px; margin: 8px 0 12px 0;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input id="negOnlyToggle" type="checkbox" />
+          Display negative only
+        </label>
+        <span class="muted" style="font-size: 0.95em;">
+          When enabled, only days with a negative total are shown.
+        </span>
+      </div>
+
       <div style="max-width: 900px;">
         <canvas id="trendChart" height="120"></canvas>
       </div>
 
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script>
-        const labels = {{ chart_labels | tojson }};
-        const values = {{ chart_values | tojson }};
+        const allLabels = {{ chart_labels | tojson }};
+        const allValues = {{ chart_values | tojson }};
+
+        function getSeries(negativeOnly) {
+          if (!negativeOnly) {
+            return { labels: allLabels, values: allValues };
+          }
+          const labels = [];
+          const values = [];
+          for (let i = 0; i < allValues.length; i++) {
+            if (Number(allValues[i]) < 0) {
+              labels.push(allLabels[i]);
+              values.push(allValues[i]);
+            }
+          }
+          return { labels, values };
+        }
 
         const ctx = document.getElementById("trendChart").getContext("2d");
-        new Chart(ctx, {
+
+        const initial = getSeries(false);
+        const chart = new Chart(ctx, {
           type: "line",
           data: {
-            labels,
+            labels: initial.labels,
             datasets: [{
               label: "Total amount",
-              data: values,
+              data: initial.values,
               borderWidth: 2,
               tension: 0.25,
               pointRadius: 2
@@ -34,6 +61,14 @@
               y: { beginAtZero: false }
             }
           }
+        });
+
+        const toggle = document.getElementById("negOnlyToggle");
+        toggle.addEventListener("change", () => {
+          const series = getSeries(toggle.checked);
+          chart.data.labels = series.labels;
+          chart.data.datasets[0].data = series.values;
+          chart.update();
         });
       </script>
 
