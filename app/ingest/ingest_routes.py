@@ -49,18 +49,13 @@ def upload_post():
     for _, r in df.iterrows():
         txs.append(
             Transaction(
-                row_number=int(r["Radnummer"]),
-                clearing_number=str(r["Clearingnummer"]).strip(),
-                account_number=str(r["Kontonummer"]).strip(),
-                product=str(r["Produkt"]).strip() if str(r["Produkt"]).strip() != "" else None,
-                currency=str(r["Valuta"]).strip() if str(r["Valuta"]).strip() != "" else None,
-                booking_day=r["Bokföringsdag"],
-                transaction_day=r["Transaktionsdag"],
-                value_day=r["Valutadag"],
-                reference=str(r["Referens"]).strip() if str(r["Referens"]).strip() != "" else None,
-                description=str(r["Beskrivning"]).strip() if str(r["Beskrivning"]).strip() != "" else None,
-                amount=float(r["Belopp"]),
-                booked_balance=float(r["Bokfört saldo"]) if r["Bokfört saldo"] is not None else None,
+
+                currency=str(r["currency"]).strip() if str(r["currency"]).strip() != "" else None,
+                booking_day=r["transactionday"],
+                transaction_day=r["transactionday"],
+                place_purchase=str(r["reference"]).strip() if str(r["reference"]).strip() != "" else None,
+                description=str(r["description"]).strip() if str(r["description"]).strip() != "" else None,
+                amount=float(r["amount"]),
                 upload_id=upload_row.id,
             )
         )

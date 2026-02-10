@@ -1,23 +1,18 @@
 import re
+import tempfile
+import os
 import pandas as pd
-from app.ingest.flexible_csv_reader_utility import read_whole_line_quoted_csv
+from app.ingest.flexible_csv_reader_utility import read_whole_line_quoted_csv, normalize_columns, clean_data
 
 
 REQUIRED_COLUMNS = ["date", "metric", "value"]
 
 REQUIRED_COLUMNS = [
-    "Radnummer",
-    "Clearingnummer",
-    "Kontonummer",
-    "Produkt",
-    "Valuta",
-    "Bokföringsdag",
-    "Transaktionsdag",
-    "Valutadag",
-    "Referens",
-    "Beskrivning",
-    "Belopp",
-    "Bokfört saldo",
+    "amount",
+    "transactionday",
+    "currency",
+    "reference",
+    "description"
 ]
 
 FIELD_MAPPING = {
@@ -58,59 +53,56 @@ def _parse_swedish_number(x) -> float | None:
 def parse_csv_to_dataframe(file_storage) -> pd.DataFrame:
     """
     Reads uploaded CSV into a dataframe and validates schema.
+    Saves FileStorage to a temp file to obtain a real filesystem path.
     """
-    # Try UTF-8 first; many Swedish exports are UTF-8 or cp1252.
-    # Pandas will raise if it can't decode; we can extend this if needed.
-    df = read_whole_line_quoted_csv(file_storage,skip_first_row=True,encoding='windows-1252',sep=',',usecols=[4,5,8,9,10])
+    tmp_path = None
+    try:
+        # On Windows, use delete=False so we can reopen it by name.
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".csv", delete=False) as tmp:
+            tmp_path = tmp.name
+            file_storage.save(tmp)  # FileStorage-friendly (doesn't rely on .read())
 
-    missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
-    if missing:
-        raise ValueError(f"CSV is missing required columns: {missing}. Expected {REQUIRED_COLUMNS}")
+        #Reading the file into a dataframe
+        df = read_whole_line_quoted_csv(
+            tmp_path,
+            skip_first_row=True,
+            encoding="windows-1252",
+            sep=",",
+            usecols=[4, 5, 8, 9, 10],
+        )
+        # Normalizing the column names to a certain standard
+        df = normalize_columns(df, FIELD_MAPPING)
+        df = clean_data(df)
 
-    df = df[REQUIRED_COLUMNS].copy()
+        # Keep only the columns you want
+        standard_columns = list(FIELD_MAPPING.keys())
+        df = df[[col for col in standard_columns if col in df.columns]]
 
-    # Parse dates (allow blank)
-    for col in ["Bokföringsdag", "Transaktionsdag", "Valutadag"]:
-        df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
+        # Validate required columns
+        missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
+        if missing:
+            raise ValueError(f"CSV is missing required columns: {missing}. Expected {REQUIRED_COLUMNS}")
 
-    # Parse numbers
-    df["Belopp"] = df["Belopp"].map(_parse_swedish_number)
-    df["Bokfört saldo"] = df["Bokfört saldo"].map(_parse_swedish_number)
+        df = df[REQUIRED_COLUMNS].copy()
 
-    # Required fields checks
-    if df["Radnummer"].isna().any():
-        raise ValueError("Column 'Radnummer' contains empty values.")
-    if df["Clearingnummer"].astype(str).str.strip().eq("").any():
-        raise ValueError("Column 'Clearingnummer' contains empty values.")
-    if df["Kontonummer"].astype(str).str.strip().eq("").any():
-        raise ValueError("Column 'Kontonummer' contains empty values.")
-    if df["Belopp"].isna().any():
-        raise ValueError("Column 'Belopp' contains empty/invalid values.")
+        # Parse dates (allow blank)
+        for col in ["transactionday"]:
+            df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
 
-    return df
+        # Parse numbers
+        df["amount"] = df["amount"].map(_parse_swedish_number)
 
-def parse_csv_to_dataframeII(file_storage) -> pd.DataFrame:
-    """
-    Reads uploaded CSV into a dataframe and validates schema.
-    """
-    df = pd.read_csv(file_storage)
+        # Required fields checks
+        if df["amount"].isna().any():
+            raise ValueError("Column 'amount' contains empty/invalid values.")
 
-    missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
-    if missing:
-        raise ValueError(f"CSV is missing required columns: {missing}. Expected {REQUIRED_COLUMNS}")
+        return df
 
-    # Keep only required columns (avoid accidental extra columns for now)
-    df = df[REQUIRED_COLUMNS].copy()
+    finally:
+        if tmp_path:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                # If something still holds the file open, avoid masking the real error
+                pass
 
-    # Parse types
-    df["date"] = pd.to_datetime(df["date"], errors="raise").dt.date
-    df["metric"] = df["metric"].astype(str).str.strip()
-    df["value"] = pd.to_numeric(df["value"], errors="raise")
-
-    # Basic sanity checks
-    if df["metric"].eq("").any():
-        raise ValueError("Column 'metric' contains empty values.")
-    if df.isna().any().any():
-        raise ValueError("CSV contains invalid/empty values after parsing.")
-
-    return df
