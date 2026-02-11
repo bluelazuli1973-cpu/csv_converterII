@@ -1,17 +1,6 @@
 from app import create_app
 
-app = create_app()
-
-
-@app.get("/")
-def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/hello/<name>")
-def say_hello(name: str):
-    return {"message": f"Hello {name}"}
-
+app = create_app('development')
 
 print("Application initiated")
 
