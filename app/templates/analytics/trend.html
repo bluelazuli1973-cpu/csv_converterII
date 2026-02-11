@@ -16,71 +16,115 @@
         </span>
       </div>
 
-      <div style="max-width: 900px;">
-        <canvas id="trendChart" height="120"></canvas>
+      <div style="
+        display:grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 18px;
+        align-items:start;
+      ">
+        <div>
+          <div style="max-width: 900px;">
+            <canvas id="trendChart" height="120"></canvas>
+          </div>
+
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script>
+            const allLabels = {{ chart_labels | tojson }};
+            const allValues = {{ chart_values | tojson }};
+
+            function getSeries(negativeOnly) {
+              if (!negativeOnly) {
+                return { labels: allLabels, values: allValues };
+              }
+              const labels = [];
+              const values = [];
+              for (let i = 0; i < allValues.length; i++) {
+                if (Number(allValues[i]) < 0) {
+                  labels.push(allLabels[i]);
+                  values.push(allValues[i]);
+                }
+              }
+              return { labels, values };
+            }
+
+            const ctx = document.getElementById("trendChart").getContext("2d");
+
+            const initial = getSeries(false);
+            const chart = new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: initial.labels,
+                datasets: [{
+                  label: "Total amount",
+                  data: initial.values,
+                  borderWidth: 2,
+                  tension: 0.25,
+                  pointRadius: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                scales: {
+                  y: { beginAtZero: false }
+                }
+              }
+            });
+
+            const toggle = document.getElementById("negOnlyToggle");
+            toggle.addEventListener("change", () => {
+              const series = getSeries(toggle.checked);
+              chart.data.labels = series.labels;
+              chart.data.datasets[0].data = series.values;
+              chart.update();
+            });
+          </script>
+
+          <h4 style="margin-top:18px;">Daily totals (table)</h4>
+          <table>
+            <thead><tr><th>Date</th><th>Total</th></tr></thead>
+            <tbody>
+              {% for day, total in per_day %}
+                <tr><td>{{ day }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h4 style="margin-top:0;">Transactions (place of purchase)</h4>
+          <div style="max-height: 520px; overflow:auto; border: 1px solid #eee; border-radius: 8px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Place</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for day, place, amount in tx_rows %}
+                  <tr>
+                    <td>{{ day }}</td>
+                    <td>{{ place or "" }}</td>
+                    <td>{{ "%.2f"|format(amount) }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <p class="muted" style="margin-top:8px;">
+            Tip: scroll inside this table to browse transactions.
+          </p>
+        </div>
       </div>
 
-      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-      <script>
-        const allLabels = {{ chart_labels | tojson }};
-        const allValues = {{ chart_values | tojson }};
-
-        function getSeries(negativeOnly) {
-          if (!negativeOnly) {
-            return { labels: allLabels, values: allValues };
+      <style>
+        @media (max-width: 900px) {
+          .card > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
           }
-          const labels = [];
-          const values = [];
-          for (let i = 0; i < allValues.length; i++) {
-            if (Number(allValues[i]) < 0) {
-              labels.push(allLabels[i]);
-              values.push(allValues[i]);
-            }
-          }
-          return { labels, values };
         }
-
-        const ctx = document.getElementById("trendChart").getContext("2d");
-
-        const initial = getSeries(false);
-        const chart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: initial.labels,
-            datasets: [{
-              label: "Total amount",
-              data: initial.values,
-              borderWidth: 2,
-              tension: 0.25,
-              pointRadius: 2
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: { beginAtZero: false }
-            }
-          }
-        });
-
-        const toggle = document.getElementById("negOnlyToggle");
-        toggle.addEventListener("change", () => {
-          const series = getSeries(toggle.checked);
-          chart.data.labels = series.labels;
-          chart.data.datasets[0].data = series.values;
-          chart.update();
-        });
-      </script>
-
-      <h4 style="margin-top:18px;">Daily totals (table)</h4>
-      <table>
-        <thead><tr><th>Date</th><th>Total</th></tr></thead>
-        <tbody>
-          {% for day, total in per_day %}
-            <tr><td>{{ day }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      </style>
     {% else %}
       <p class="muted">No data yet—upload a CSV first.</p>
     {% endif %}

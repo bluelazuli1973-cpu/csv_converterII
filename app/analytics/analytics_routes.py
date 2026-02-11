@@ -21,6 +21,17 @@ def trend():
         .order_by(Transaction.transaction_day.asc())
     ).all()
 
+    # Transactions list for table (includes place of purchase)
+    tx_rows = db.session.execute(
+        db.select(
+            Transaction.transaction_day,
+            Transaction.place_purchase,
+            Transaction.amount,
+        )
+        .where(Transaction.transaction_day.isnot(None))
+        .order_by(Transaction.transaction_day.asc(), Transaction.id.asc())
+    ).all()
+
     # Chart.js likes plain lists
     chart_labels = [d.isoformat() for d, _total in per_day_rows]
     chart_values = [float(total or 0.0) for _d, total in per_day_rows]
@@ -28,6 +39,7 @@ def trend():
     return render_template(
         "analytics/trend.html",
         per_day=per_day_rows,
+        tx_rows=tx_rows,
         chart_labels=chart_labels,
         chart_values=chart_values,
     )
