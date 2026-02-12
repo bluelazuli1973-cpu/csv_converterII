@@ -18,6 +18,7 @@ def create_app(config_name):
     from .ingest.ingest_routes import ingest_bp
     from .analytics.analytics_routes import analytics_bp
 
+    app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(ingest_bp)
     app.register_blueprint(analytics_bp)

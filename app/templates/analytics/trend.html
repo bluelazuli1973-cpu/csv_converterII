@@ -1,132 +1,196 @@
 {% extends "base.html" %}
 {% block content %}
-  <div class="card">
-    <h2>Trends</h2>
+  <div class="d-flex align-items-end justify-content-between mb-3">
+    <div>
+      <h1 class="page-title mb-1">Expense Analysis</h1>
+      <div class="kicker">Trends & daily totals from your uploaded CSV</div>
+    </div>
+  </div>
 
-    <h3>Total amount per day (transaction date)</h3>
-
-    {% if per_day %}
-      <div style="display:flex; align-items:center; gap:10px; margin: 8px 0 12px 0;">
-        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <input id="negOnlyToggle" type="checkbox" />
-          Display negative only
-        </label>
-        <span class="muted" style="font-size: 0.95em;">
-          When enabled, only days with a negative total are shown.
-        </span>
-      </div>
-
-      <div style="
-        display:grid;
-        grid-template-columns: 1.6fr 1fr;
-        gap: 18px;
-        align-items:start;
-      ">
-        <div>
-          <div style="max-width: 900px;">
-            <canvas id="trendChart" height="120"></canvas>
+  {% if per_day %}
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="ui-card stat-card">
+          <div class="stat-icon">💳</div>
+          <div>
+            <p class="stat-label">Total Spending</p>
+            <p class="stat-value mb-0">—</p>
           </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="ui-card stat-card">
+          <div class="stat-icon">📅</div>
+          <div>
+            <p class="stat-label">Monthly Budget</p>
+            <p class="stat-value mb-0">—</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="ui-card stat-card">
+          <div class="stat-icon">🛒</div>
+          <div>
+            <p class="stat-label">Top Category</p>
+            <p class="stat-value mb-0">—</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="ui-card stat-card">
+          <div class="stat-icon">📈</div>
+          <div>
+            <p class="stat-label">This Month’s Savings</p>
+            <p class="stat-value mb-0">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          <script>
-            const allLabels = {{ chart_labels | tojson }};
-            const allValues = {{ chart_values | tojson }};
-
-            function getSeries(negativeOnly) {
-              if (!negativeOnly) {
-                return { labels: allLabels, values: allValues };
-              }
-              const labels = [];
-              const values = [];
-              for (let i = 0; i < allValues.length; i++) {
-                if (Number(allValues[i]) < 0) {
-                  labels.push(allLabels[i]);
-                  values.push(allValues[i]);
-                }
-              }
-              return { labels, values };
-            }
-
-            const ctx = document.getElementById("trendChart").getContext("2d");
-
-            const initial = getSeries(false);
-            const chart = new Chart(ctx, {
-              type: "line",
-              data: {
-                labels: initial.labels,
-                datasets: [{
-                  label: "Total amount",
-                  data: initial.values,
-                  borderWidth: 2,
-                  tension: 0.25,
-                  pointRadius: 2
-                }]
-              },
-              options: {
-                responsive: true,
-                scales: {
-                  y: { beginAtZero: false }
-                }
-              }
-            });
-
-            const toggle = document.getElementById("negOnlyToggle");
-            toggle.addEventListener("change", () => {
-              const series = getSeries(toggle.checked);
-              chart.data.labels = series.labels;
-              chart.data.datasets[0].data = series.values;
-              chart.update();
-            });
-          </script>
-
-          <h4 style="margin-top:18px;">Daily totals (table)</h4>
-          <table>
-            <thead><tr><th>Date</th><th>Total</th></tr></thead>
-            <tbody>
-              {% for day, total in per_day %}
-                <tr><td>{{ day }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <div class="ui-card mb-3">
+      <div class="ui-card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div>
+          <div class="section-title">Spending Trend</div>
+          <div class="kicker">Total amount per day (transaction date)</div>
         </div>
 
-        <div>
-          <h4 style="margin-top:0;">Transactions (place of purchase)</h4>
-          <div style="max-height: 520px; overflow:auto; border: 1px solid #eee; border-radius: 8px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Place</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for day, place, amount in tx_rows %}
-                  <tr>
-                    <td>{{ day }}</td>
-                    <td>{{ place or "" }}</td>
-                    <td>{{ "%.2f"|format(amount) }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+        <div class="d-flex align-items-center gap-2">
+          <div class="form-check mb-0">
+            <input class="form-check-input" id="negOnlyToggle" type="checkbox" />
+            <label class="form-check-label" for="negOnlyToggle">
+              Display negative only
+            </label>
           </div>
-          <p class="muted" style="margin-top:8px;">
-            Tip: scroll inside this table to browse transactions.
-          </p>
         </div>
       </div>
 
-      <style>
-        @media (max-width: 900px) {
-          .card > div[style*="grid-template-columns"] {
-            grid-template-columns: 1fr !important;
+      <div class="ui-card-body">
+        <div class="row g-3">
+          <div class="col-12 col-lg-8">
+            <div class="chart-wrap">
+              <canvas id="trendChart" height="120"></canvas>
+            </div>
+
+            <hr class="hr-soft my-3" />
+
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="section-title">Daily totals (table)</div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table ui-table align-middle">
+                <thead>
+                  <tr><th>Date</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                  {% for day, total in per_day %}
+                    <tr><td>{{ day }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="section-title">Transactions</div>
+              <div class="kicker">Place of purchase</div>
+            </div>
+
+            <div class="ui-card" style="box-shadow:none;">
+              <div class="ui-card-body" style="padding:0;">
+                <div style="max-height: 520px; overflow:auto;">
+                  <table class="table ui-table align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Place</th>
+                        <th class="text-end">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for day, place, amount in tx_rows %}
+                        <tr>
+                          <td>{{ day }}</td>
+                          <td>{{ place or "" }}</td>
+                          <td class="text-end">{{ "%.2f"|format(amount) }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <p class="kicker mt-2 mb-0">Tip: scroll inside this table to browse transactions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const allLabels = {{ chart_labels | tojson }};
+      const allValues = {{ chart_values | tojson }};
+
+      function getSeries(negativeOnly) {
+        if (!negativeOnly) return { labels: allLabels, values: allValues };
+        const labels = [];
+        const values = [];
+        for (let i = 0; i < allValues.length; i++) {
+          if (Number(allValues[i]) < 0) {
+            labels.push(allLabels[i]);
+            values.push(allValues[i]);
           }
         }
-      </style>
-    {% else %}
-      <p class="muted">No data yet—upload a CSV first.</p>
-    {% endif %}
-  </div>
+        return { labels, values };
+      }
+
+      const ctx = document.getElementById("trendChart").getContext("2d");
+
+      const initial = getSeries(false);
+      const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: initial.labels,
+          datasets: [{
+            label: "Total amount",
+            data: initial.values,
+            borderWidth: 3,
+            tension: 0.35,
+            pointRadius: 2,
+            borderColor: "#2f6fed",
+            backgroundColor: "rgba(47, 111, 237, 0.10)",
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { mode: "index", intersect: false }
+          },
+          interaction: { mode: "index", intersect: false },
+          scales: {
+            x: { grid: { display: false } },
+            y: { beginAtZero: false }
+          }
+        }
+      });
+
+      const toggle = document.getElementById("negOnlyToggle");
+      toggle.addEventListener("change", () => {
+        const series = getSeries(toggle.checked);
+        chart.data.labels = series.labels;
+        chart.data.datasets[0].data = series.values;
+        chart.update();
+      });
+    </script>
+  {% else %}
+    <div class="ui-card">
+      <div class="ui-card-body">
+        <p class="kicker mb-0">No data yet—upload a CSV first.</p>
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}

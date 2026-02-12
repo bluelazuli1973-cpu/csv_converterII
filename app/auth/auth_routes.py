@@ -32,7 +32,7 @@ def register_post():
     db.session.commit()
 
     login_user(user)
-    return redirect(url_for("ingest.upload"))
+    return redirect(url_for("analytics.trend"))
 
 
 @auth_bp.get("/login")
@@ -51,7 +51,7 @@ def login_post():
         return redirect(url_for("auth.login"))
 
     login_user(user)
-    return redirect(url_for("ingest.upload"))
+    return redirect(url_for("analytics.trend"))
 
 
 @auth_bp.get("/logout")

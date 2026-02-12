@@ -60,5 +60,11 @@ class Transaction(db.Model):
 
     amount = db.Column(db.Float, nullable=False)                               # Belopp (can be +/-)
 
+    # NEW FIELDS revision 1_1
+    is_expense = db.Column(db.Boolean, nullable=False, default=True, index=True)
+    category = db.Column(db.String(64), nullable=False, default="Uncategorized", index=True)
+
+    # END NEW FIELDS 1_1
+
     upload_id = db.Column(db.Integer, db.ForeignKey("uploads.id"), nullable=False, index=True)
     upload = db.relationship("Upload", back_populates="transactions")

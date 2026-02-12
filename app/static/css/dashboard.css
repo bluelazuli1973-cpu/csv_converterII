@@ -1,0 +1,136 @@
+:root {
+  --bg: #f6f8fc;
+  --card-bg: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e6eaf2;
+
+  --primary: #2f6fed;
+  --primary-2: #4f8cff;
+
+  --radius: 14px;
+  --shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Page header (like "Expense Analysis") */
+.page-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Subtle muted text helper */
+.text-muted-2 {
+  color: var(--muted) !important;
+}
+
+/* App shell spacing */
+.app-main {
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+/* “Dashboard cards” */
+.ui-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.ui-card-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ui-card-body {
+  padding: 18px;
+}
+
+/* Stat cards row */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(47, 111, 237, 0.10);
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 0.92rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.stat-value {
+  font-size: 1.35rem;
+  font-weight: 750;
+  margin: 2px 0 0 0;
+}
+
+/* Tables (clean + compact like the screenshot) */
+.table.ui-table {
+  margin: 0;
+}
+
+.table.ui-table thead th {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 650;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.table.ui-table tbody td {
+  border-top: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+/* Small helpers */
+.section-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.kicker {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.hr-soft {
+  border-top: 1px solid var(--border);
+  opacity: 1;
+}
+
+/* Make Chart.js canvas feel “contained” */
+.chart-wrap {
+  padding: 8px 0 0 0;
+}
+
+/* Navbar polish (subtle) */
+.navbar {
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.navbar.bg-body-tertiary {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(8px);
+}

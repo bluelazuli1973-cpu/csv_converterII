@@ -28,7 +28,8 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
       <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('ingest.upload') }}">
+        <a class="navbar-brand d-flex align-items-center"
+           href="{% if current_user.is_authenticated %}{{ url_for('analytics.trend') }}{% else %}{{ url_for('auth.login') }}{% endif %}">
           <img
             class="brand-logo me-2"
             src="{{ url_for('static', filename='img/logo.jpg') }}"
