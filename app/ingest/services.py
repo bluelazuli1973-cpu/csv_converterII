@@ -50,6 +50,27 @@ def _parse_swedish_number(x) -> float | None:
         raise ValueError(f"Invalid number: {x!r}")
     return float(s)
 
+def derive_transaction_fields(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add derived transaction fields used by the app/db.
+
+    Option A:
+      - keep df["amount"] signed
+      - expense if amount < 0, otherwise income
+
+    Returns a new DataFrame (does not mutate the caller's df).
+    """
+    df = df.copy()
+
+    if "amount" not in df.columns:
+        raise ValueError("Cannot derive fields: missing required column 'amount'.")
+
+    if df["amount"].isna().any():
+        raise ValueError("Cannot derive fields: column 'amount' contains empty/invalid values.")
+
+    df["is_expense"] = df["amount"] < 0
+    return df
+
 def parse_csv_to_dataframe(file_storage) -> pd.DataFrame:
     """
     Reads uploaded CSV into a dataframe and validates schema.
@@ -96,6 +117,7 @@ def parse_csv_to_dataframe(file_storage) -> pd.DataFrame:
         if df["amount"].isna().any():
             raise ValueError("Column 'amount' contains empty/invalid values.")
 
+        df = derive_transaction_fields(df)
         return df
 
     finally:
@@ -105,4 +127,3 @@ def parse_csv_to_dataframe(file_storage) -> pd.DataFrame:
             except OSError:
                 # If something still holds the file open, avoid masking the real error
                 pass
-

@@ -49,13 +49,13 @@ def upload_post():
     for _, r in df.iterrows():
         txs.append(
             Transaction(
-
                 currency=str(r["currency"]).strip() if str(r["currency"]).strip() != "" else None,
                 booking_day=r["transactionday"],
                 transaction_day=r["transactionday"],
                 place_purchase=str(r["reference"]).strip() if str(r["reference"]).strip() != "" else None,
                 description=str(r["description"]).strip() if str(r["description"]).strip() != "" else None,
                 amount=float(r["amount"]),
+                is_expense=bool(r["is_expense"]),
                 upload_id=upload_row.id,
             )
         )
