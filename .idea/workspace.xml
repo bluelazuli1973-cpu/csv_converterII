@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="627b9f9a-9cd5-4c87-a943-a8c0292e4bb2" name="Changes" comment="adding a generic csv reader utility">
+    <list default="true" id="627b9f9a-9cd5-4c87-a943-a8c0292e4bb2" name="Changes" comment="added some notes on the database migration">
       <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/ingest/read_csv_format.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/ingest/csv_read_and_convert.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/csv_read_and_convert.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/ingest/field_mapping.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/field_mapping.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/ingest/flexible_csv_reader_utility.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/flexible_csv_reader_utility.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ingest/ingest_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/ingest_routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ingest/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ingest/services.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,7 +16,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="40" />
+    <option name="cachedIndexableFilesCount" value="52" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
@@ -76,7 +73,7 @@
     &quot;Python.CSV_ConverterII.executor&quot;: &quot;Run&quot;,
     &quot;Python.Flask main.executor&quot;: &quot;Run&quot;,
     &quot;Python.field_mapping.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
@@ -99,14 +96,14 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII" />
+      <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\main" />
+      <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\static\img" />
       <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\ingest" />
       <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\templates\ingest" />
-      <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\templates" />
-      <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app\templates\auth" />
-      <recent name="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII\app" />
     </key>
   </component>
-  <component name="RunManager" selected="FastAPI.CSV_ConverterII">
+  <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python">
       <module name="CSV_ConverterII" />
       <option name="ENV_FILES" value="" />
@@ -175,7 +172,9 @@
       <workItem from="1770633900434" duration="454000" />
       <workItem from="1770634360485" duration="2150000" />
       <workItem from="1770641214858" duration="7463000" />
-      <workItem from="1770651026440" duration="20174000" />
+      <workItem from="1770651026440" duration="34444000" />
+      <workItem from="1770812654520" duration="6861000" />
+      <workItem from="1770881632086" duration="5103000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Project Setup and Basic">
       <option name="closed" value="true" />
@@ -233,68 +232,148 @@
       <option name="project" value="LOCAL" />
       <updated>1770659524544</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="added a csv reader utility that can handle swedish csv with quoted lines">
+      <option name="closed" value="true" />
+      <created>1770729250082</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770729250082</updated>
+    </task>
+    <task id="LOCAL-00009" summary="added skiprow">
+      <option name="closed" value="true" />
+      <created>1770729773407</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770729773407</updated>
+    </task>
+    <task id="LOCAL-00010" summary="cleaner version of csv reader utility">
+      <option name="closed" value="true" />
+      <created>1770738596915</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1770738596915</updated>
+    </task>
+    <task id="LOCAL-00011" summary="can now handle swedish csv and adding the normalized data to the database">
+      <option name="closed" value="true" />
+      <created>1770742208039</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1770742208039</updated>
+    </task>
+    <task id="LOCAL-00012" summary="show a simple graph over the date and amount in trends">
+      <option name="closed" value="true" />
+      <created>1770742512196</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1770742512196</updated>
+    </task>
+    <task id="LOCAL-00013" summary="show a simple graph over the date and amount in trends">
+      <option name="closed" value="true" />
+      <created>1770749051817</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1770749051817</updated>
+    </task>
+    <task id="LOCAL-00014" summary="cleaned up the web page layout">
+      <option name="closed" value="true" />
+      <created>1770797977941</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1770797977941</updated>
+    </task>
+    <task id="LOCAL-00015" summary="carved out configuration">
+      <option name="closed" value="true" />
+      <created>1770816873546</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1770816873546</updated>
+    </task>
+    <task id="LOCAL-00016" summary="added category and expense to the model and updated the possibility to run database scripts for migration">
+      <option name="closed" value="true" />
+      <created>1770883739350</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1770883739350</updated>
+    </task>
+    <task id="LOCAL-00017" summary="added some notes on the database migration">
+      <option name="closed" value="true" />
+      <created>1770884002457</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1770884002457</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial Project Setup and Basic" />
     <MESSAGE value="modified the schema with transactions" />
     <MESSAGE value="renamed upload to uploads" />
     <MESSAGE value="adding a generic csv reader utility" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding a generic csv reader utility" />
+    <MESSAGE value="added a csv reader utility that can handle swedish csv with quoted lines" />
+    <MESSAGE value="added skiprow" />
+    <MESSAGE value="cleaner version of csv reader utility" />
+    <MESSAGE value="can now handle swedish csv and adding the normalized data to the database" />
+    <MESSAGE value="show a simple graph over the date and amount in trends" />
+    <MESSAGE value="cleaned up the web page layout" />
+    <MESSAGE value="carved out configuration" />
+    <MESSAGE value="added category and expense to the model and updated the possibility to run database scripts for migration" />
+    <MESSAGE value="added some notes on the database migration" />
+    <option name="LAST_COMMIT_MESSAGE" value="added some notes on the database migration" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/auth/auth_routes.py</url>
-          <line>16</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/auth/auth_routes.py</url>
-          <line>44</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/ingest/ingest_routes.py</url>
-          <line>44</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/ingest/services.py</url>
-          <line>52</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/ingest/services.py</url>
-          <line>84</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/ingest/ingest_routes.py</url>
-          <line>34</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/analytics/analytics_routes.py</url>
-          <line>13</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/app/ingest/field_mapping.py</url>
           <line>14</line>
           <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/analytics/analytics_routes.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/analytics/analytics_routes.py</url>
+          <line>45</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/__init__.py</url>
+          <line>9</line>
+          <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/CSV_ConverterII$main.coverage" NAME="main Coverage Results" MODIFIED="1770645361423" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII" />
-    <SUITE FILE_PATH="coverage/CSV_ConverterII$CSV_ConverterII.coverage" NAME="CSV_ConverterII Coverage Results" MODIFIED="1770633457940" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/CSV_ConverterII$main.coverage" NAME="main Coverage Results" MODIFIED="1770889339026" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\asund\OneDrive\Dokument\GitHub\CSV_ConverterII" />
+    <SUITE FILE_PATH="coverage/CSV_ConverterII$CSV_ConverterII.coverage" NAME="CSV_ConverterII Coverage Results" MODIFIED="1770817408324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/CSV_ConverterII$field_mapping.coverage" NAME="field_mapping Coverage Results" MODIFIED="1770649668783" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app/ingest" />
   </component>
 </project>
