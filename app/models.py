@@ -64,6 +64,10 @@ class Transaction(db.Model):
     is_expense = db.Column(db.Boolean, nullable=False, default=True, index=True)
     category = db.Column(db.String(64), nullable=False, default="Uncategorized", index=True)
 
+    # NWE FIELDS revision 1_2
+    # Tag: financial transaction (e.g., Överföring, Lön)
+    is_financial_transaction = db.Column(db.Boolean, nullable=False, default=False, index=True)
+
     # END NEW FIELDS 1_1
 
     upload_id = db.Column(db.Integer, db.ForeignKey("uploads.id"), nullable=False, index=True)

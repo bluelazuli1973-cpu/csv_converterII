@@ -53,6 +53,10 @@ def upload_post():
             if category == "":
                 category = None
 
+        is_financial = False
+        if "is_financial_transaction" in df.columns:
+            is_financial = bool(r["is_financial_transaction"])
+
         txs.append(
             Transaction(
                 currency=str(r["currency"]).strip() if str(r["currency"]).strip() != "" else None,
@@ -63,6 +67,7 @@ def upload_post():
                 amount=float(r["amount"]),
                 is_expense=bool(r["is_expense"]),
                 category=category or "Uncategorized",
+                is_financial_transaction=is_financial,
                 upload_id=upload_row.id,
             )
         )

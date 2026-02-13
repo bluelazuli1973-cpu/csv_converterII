@@ -14,7 +14,7 @@
           <div class="stat-icon">💳</div>
           <div>
             <p class="stat-label">Total Spending</p>
-            <p class="stat-value mb-0">—</p>
+            <p class="stat-value mb-0">{{ "%.2f"|format(total_spending or 0) }}</p>
           </div>
         </div>
       </div>

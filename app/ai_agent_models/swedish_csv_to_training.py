@@ -100,6 +100,9 @@ MERCHANT_TO_TARGET: dict[str, str] = {
     "taxi kurir": "Taxi & samåkning",
     "uber": "Taxi & samåkning",
     "lyft": "Taxi & samåkning",
+    "transportstyrelsen": "Resor: transport & boende",
+    "bikepath": "Resor: transport & boende",
+    "st1": "Resor: transport & boende",
 
     #--- Vård och syn ---
     "apoteket": "Apotek & medicin",
@@ -109,6 +112,8 @@ MERCHANT_TO_TARGET: dict[str, str] = {
     "synoptik": "Optik",
     "öga": "Optik",
     "ögat": "Optik",
+    "IngridLinenstei": "Vård & tandvård",
+    "nasbyparkshuslak": "Vård & tandvård",
 
     #--- Böcker och media ---
     "akademibokhandeln": "Böcker & media",
@@ -137,10 +142,13 @@ MERCHANT_TO_TARGET: dict[str, str] = {
     "xxl": "Sportutrustning",
     "sats": "Sport & träning",
     "nautilus": "Sport & träning",
+    "hagloefs": "Sport & träning",
+    "medlemskap": "Sport & träning",
 
     #--- Husdjur ---
     "zoo kompaniet": "Husdjur",
     "arken zoo": "Husdjur",
+    "evidensia": "Husdjur",
 
     # --- Groceries / supermarkets ---
     "ica": "Dagligvaror",
@@ -148,10 +156,37 @@ MERCHANT_TO_TARGET: dict[str, str] = {
     "hemkop": "Dagligvaror",
     "coop": "Dagligvaror",
     "konsum": "Dagligvaror",
+    "gateau": "Dagligvaror",
+    "stora coop": "Dagligvaror",
+    "asian trading": "Dagligvaror",
+
+    # --- Restaurang ---
+    "la neta": "Restaurang",
+    "ramen": "Restaurang",
+    "kajsas fisk": "Restaurang",
+    "watami": "Restaurang",
+    "mama pa": "Restaurang",
+    "mama pa k25": "Restaurang",
+    "holy greens ab": "Restaurang",
+    "resturang": "Restaurang",
+    "little indian": "Restaurang",
+    "mangalore": "Restaurang",
+    "sin ramen": "Restaurang",
+    "ikki": "Restaurang",
+    "la tour": "Restaurang",
+
+
 
     # --- Finans & avgifter ---
     "överföring": "Finans & avgifter",
     "swish": "Finans & avgifter",
+    "lön": "Finans & avgifter",
+    "83279": "Finans & avgifter",
+    "avanza bank": "Finans & avgifter",
+    "skattepterbäring": "Finans & avgifter",
+
+    # --- Boende ---
+    "trygg hansa": "Boende: Hyra & avgifter",
 }
 
 

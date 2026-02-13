@@ -95,6 +95,7 @@ def derive_transaction_fields(df: pd.DataFrame) -> pd.DataFrame:
     Also derives:
       - category (predicted by trained model)
       - category_confidence (max probability, if model supports predict_proba)
+      - is_financial_transaction (Överföring/Lön tag)
 
     Returns a new DataFrame (does not mutate the caller's df).
     """
@@ -107,6 +108,17 @@ def derive_transaction_fields(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Cannot derive fields: column 'amount' contains empty/invalid values.")
 
     df["is_expense"] = df["amount"] < 0
+
+    # --- financial transaction tag ---
+    # Tag rows that contain Swedish keywords in description/reference
+    financial_keywords = ("överföring", "lön")
+
+    desc = df.get("description", pd.Series([""] * len(df), index=df.index)).fillna("").astype(str).str.casefold()
+    ref = df.get("reference", pd.Series([""] * len(df), index=df.index)).fillna("").astype(str).str.casefold()
+
+    df["is_financial_transaction"] = desc.str.contains("|".join(financial_keywords), regex=True) | ref.str.contains(
+        "|".join(financial_keywords), regex=True
+    )
 
     # --- category prediction ---
     # Requires at least one text field to be present; we can still run with blanks,

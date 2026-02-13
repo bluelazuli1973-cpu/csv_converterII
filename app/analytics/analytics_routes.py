@@ -15,7 +15,6 @@ def trend():
         if not raw:
             return None
         try:
-            # expects YYYY-MM-DD from <input type="date">
             return Transaction.transaction_day.type.python_type.fromisoformat(raw)
         except Exception:
             return None
@@ -24,65 +23,87 @@ def trend():
     start_date = _parse_date_arg("start")
     end_date = _parse_date_arg("end")
 
-    # Base filters (apply to charts; category filter is for tx table only)
-    base_filters = [
-        Transaction.transaction_day.isnot(None),
-        Transaction.is_expense.is_(True),
-    ]
-    if start_date is not None:
-        base_filters.append(Transaction.transaction_day >= start_date)
-    if end_date is not None:
-        base_filters.append(Transaction.transaction_day <= end_date)
-
-    # Daily totals over transaction date (display spending as positive)
-    per_day_rows = db.session.execute(
-        db.select(
-            Transaction.transaction_day,
-            db.func.sum(-Transaction.amount).label("total"),
-        )
-        .where(*base_filters)
-        .group_by(Transaction.transaction_day)
-        .order_by(Transaction.transaction_day.asc())
-    ).all()
-
-    # Spending by category (expenses only), display spending as positive
     category_expr = db.func.coalesce(Transaction.category, "Uncategorized")
     category_norm = db.func.lower(db.func.trim(category_expr))
 
-    per_category_rows = db.session.execute(
-        db.select(
-            category_expr.label("category"),
-            db.func.sum(-Transaction.amount).label("total"),
-        )
+    # --- Ensure all template variables are defined on every path ---
+    per_day_rows = []
+    chart_labels = []
+    chart_values = []
+    category_labels = []
+    category_values = []
+
+    # Categories for dropdown (unfiltered so you can always switch)
+    # NOTE: Never include financial transactions in this view.
+    categories = db.session.execute(
+        db.select(category_expr.label("category"))
         .where(
-            *base_filters,
-            category_norm != "övrigt/okänd",
+            Transaction.transaction_day.isnot(None),
+            Transaction.is_financial_transaction.is_(False),
         )
         .group_by(category_expr)
-        .order_by(db.func.sum(-Transaction.amount).desc())
-        .limit(5)
-    ).all()
+        .order_by(category_norm.asc())
+    ).scalars().all()
 
-    # Categories list for filter dropdown
-    categories = [
-        row[0]
-        for row in db.session.execute(
-            db.select(category_expr.label("category"))
-            .where(Transaction.category.isnot(None))
-            .group_by(category_expr)
-            .order_by(category_expr.asc())
-        ).all()
-        if row[0]
-    ]
+    # ... existing code ...
 
     # Transactions list for table (category + date-range filters)
-    tx_filters = [Transaction.transaction_day.isnot(None)]
+    # NOTE: Never include financial transactions in this view.
+    tx_filters = [
+        Transaction.transaction_day.isnot(None),
+        Transaction.is_financial_transaction.is_(False),
+    ]
     if start_date is not None:
         tx_filters.append(Transaction.transaction_day >= start_date)
     if end_date is not None:
         tx_filters.append(Transaction.transaction_day <= end_date)
     if selected_category:
         tx_filters.append(category_expr == selected_category)
+
+    # Per-day totals for trend (expenses only; displayed as positive)
+    per_day_rows = db.session.execute(
+        db.select(
+            Transaction.transaction_day.label("day"),
+            db.func.coalesce(db.func.sum(-Transaction.amount), 0.0).label("total"),
+        )
+        .where(
+            *tx_filters,
+            Transaction.is_expense.is_(True),
+        )
+        .group_by(Transaction.transaction_day)
+        .order_by(Transaction.transaction_day.asc())
+    ).all()
+
+    chart_labels = [row.day.isoformat() if row.day else "" for row in per_day_rows]
+    chart_values = [float(row.total or 0.0) for row in per_day_rows]
+
+    # Category breakdown (same date filters; ignore selected_category so the breakdown is useful)
+    breakdown_filters = [f for f in tx_filters if f is not (category_expr == selected_category)] if selected_category else list(tx_filters)
+    cat_rows = db.session.execute(
+        db.select(
+            category_expr.label("category"),
+            db.func.coalesce(db.func.sum(-Transaction.amount), 0.0).label("total"),
+        )
+        .where(
+            *breakdown_filters,
+            Transaction.is_expense.is_(True),
+        )
+        .group_by(category_expr, category_norm)
+        .order_by(db.func.coalesce(db.func.sum(-Transaction.amount), 0.0).desc(), category_norm.asc())
+    ).all()
+
+    category_labels = [row.category for row in cat_rows]
+    category_values = [float(row.total or 0.0) for row in cat_rows]
+
+    # Total spending should follow the same filters as the table,
+    # but only count expenses and display as positive.
+    total_spending = db.session.execute(
+        db.select(db.func.coalesce(db.func.sum(-Transaction.amount), 0.0))
+        .where(
+            *tx_filters,
+            Transaction.is_expense.is_(True),
+        )
+    ).scalar_one()
 
     tx_rows = db.session.execute(
         db.select(
@@ -95,12 +116,7 @@ def trend():
         .order_by(Transaction.transaction_day.asc(), Transaction.id.asc())
     ).all()
 
-    # Chart.js likes plain lists
-    chart_labels = [d.isoformat() for d, _total in per_day_rows]
-    chart_values = [float(total or 0.0) for _d, total in per_day_rows]
-
-    category_labels = [str(cat) for cat, _total in per_category_rows]
-    category_values = [float(total or 0.0) for _cat, total in per_category_rows]
+    # ... existing code ...
 
     return render_template(
         "analytics/trend.html",
@@ -114,4 +130,5 @@ def trend():
         selected_category=selected_category,
         start_date=start_date.isoformat() if start_date else "",
         end_date=end_date.isoformat() if end_date else "",
+        total_spending=float(total_spending or 0.0),
     )
