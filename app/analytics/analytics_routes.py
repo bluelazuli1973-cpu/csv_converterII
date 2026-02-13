@@ -32,6 +32,7 @@ def trend():
     chart_values = []
     category_labels = []
     category_values = []
+    top_category = ""
 
     # Categories for dropdown (unfiltered so you can always switch)
     # NOTE: Never include financial transactions in this view.
@@ -77,8 +78,16 @@ def trend():
     chart_labels = [row.day.isoformat() if row.day else "" for row in per_day_rows]
     chart_values = [float(row.total or 0.0) for row in per_day_rows]
 
-    # Category breakdown (same date filters; ignore selected_category so the breakdown is useful)
-    breakdown_filters = [f for f in tx_filters if f is not (category_expr == selected_category)] if selected_category else list(tx_filters)
+    # Category breakdown (base + date filters; intentionally ignore selected_category)
+    breakdown_filters = [
+        Transaction.transaction_day.isnot(None),
+        Transaction.is_financial_transaction.is_(False),
+    ]
+    if start_date is not None:
+        breakdown_filters.append(Transaction.transaction_day >= start_date)
+    if end_date is not None:
+        breakdown_filters.append(Transaction.transaction_day <= end_date)
+
     cat_rows = db.session.execute(
         db.select(
             category_expr.label("category"),
@@ -89,11 +98,17 @@ def trend():
             Transaction.is_expense.is_(True),
         )
         .group_by(category_expr, category_norm)
-        .order_by(db.func.coalesce(db.func.sum(-Transaction.amount), 0.0).desc(), category_norm.asc())
+        .order_by(
+            db.func.coalesce(db.func.sum(-Transaction.amount), 0.0).desc(),
+            category_norm.asc(),
+        )
     ).all()
 
     category_labels = [row.category for row in cat_rows]
     category_values = [float(row.total or 0.0) for row in cat_rows]
+
+    # Top category name (first row after ordering by total desc)
+    top_category = (cat_rows[0].category if cat_rows else "") or ""
 
     # Total spending should follow the same filters as the table,
     # but only count expenses and display as positive.
@@ -131,4 +146,5 @@ def trend():
         start_date=start_date.isoformat() if start_date else "",
         end_date=end_date.isoformat() if end_date else "",
         total_spending=float(total_spending or 0.0),
+        top_category=top_category,
     )
