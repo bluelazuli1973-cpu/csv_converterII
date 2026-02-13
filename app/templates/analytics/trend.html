@@ -70,65 +70,93 @@
             <div class="chart-wrap">
               <canvas id="trendChart" height="120"></canvas>
             </div>
-
-            <hr class="hr-soft my-3" />
-
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <div class="section-title">Daily totals (table)</div>
-            </div>
-
-            <div class="scroll-y-360">
-              <div class="table-responsive">
-                <table class="table ui-table align-middle">
-                  <thead>
-                    <tr><th>Date</th><th>Total</th></tr>
-                  </thead>
-                  <tbody>
-                    {% for day, total in per_day %}
-                      <tr><td>{{ day }}</td><td>{{ "%.2f"|format(total) }}</td></tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
 
           <div class="col-12 col-lg-5">
             <div class="d-flex align-items-center justify-content-between mb-2">
-              <div class="section-title">Transactions</div>
-              <div class="kicker">Place of purchase</div>
+              <div class="section-title">Spending by Category</div>
+              <div class="kicker">Expenses breakdown top 5</div>
             </div>
 
             <div class="ui-card ui-card--flat">
-              <div class="ui-card-body ui-card-body--flush">
-                <div class="scroll-y-640">
-                  <table class="table ui-table align-middle mb-0">
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Place</th>
-                        <th>Category</th>
-                        <th class="text-end">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for day, place, category, amount in tx_rows %}
-                        <tr>
-                          <td>{{ day }}</td>
-                          <td>{{ place or "" }}</td>
-                          <td>{{ category or "Uncategorized" }}</td>
-                          <td class="text-end">{{ "%.2f"|format(amount) }}</td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+              <div class="ui-card-body">
+                <div class="chart-wrap">
+                  <canvas id="categoryChart" height="180"></canvas>
                 </div>
               </div>
             </div>
-
-            <p class="kicker mt-2 mb-0">Tip: scroll inside this table to browse transactions.</p>
           </div>
         </div>
+
+        <hr class="hr-soft my-3" />
+
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-2">
+          <div>
+            <div class="section-title">Transactions</div>
+            <div class="kicker">Filter by category and date range</div>
+          </div>
+
+          <form method="get" class="d-flex flex-wrap align-items-end gap-2">
+            <div>
+              <label class="form-label mb-1 kicker" for="categorySelect">Category</label>
+              <select id="categorySelect" name="category" class="form-select form-select-sm">
+                <option value="" {% if not selected_category %}selected{% endif %}>All</option>
+                {% for c in categories %}
+                  <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label mb-1 kicker" for="startDate">From</label>
+              <input id="startDate" name="start" type="date" class="form-control form-control-sm" value="{{ start_date }}">
+            </div>
+
+            <div>
+              <label class="form-label mb-1 kicker" for="endDate">To</label>
+              <input id="endDate" name="end" type="date" class="form-control form-control-sm" value="{{ end_date }}">
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-primary" type="submit">Apply</button>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('analytics.trend') }}">Reset</a>
+            </div>
+          </form>
+        </div>
+
+        <div class="ui-card ui-card--flat">
+          <div class="ui-card-body ui-card-body--flush">
+            <div class="scroll-y-640">
+              <table class="table ui-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Place</th>
+                    <th>Category</th>
+                    <th class="text-end">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for day, place, category, amount in tx_rows %}
+                    <tr>
+                      <td>{{ day }}</td>
+                      <td>{{ place or "" }}</td>
+                      <td>{{ category or "Uncategorized" }}</td>
+                      <td class="text-end">{{ "%.2f"|format(amount) }}</td>
+                    </tr>
+                  {% endfor %}
+                  {% if not tx_rows %}
+                    <tr>
+                      <td colspan="4" class="kicker">No transactions match the selected filters.</td>
+                    </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <p class="kicker mt-2 mb-0">Tip: scroll inside this table to browse transactions.</p>
       </div>
     </div>
 
@@ -136,6 +164,9 @@
     <script>
       const allLabels = {{ chart_labels | tojson }};
       const allValues = {{ chart_values | tojson }};
+
+      const categoryLabels = {{ category_labels | tojson }};
+      const categoryValues = {{ category_values | tojson }};
 
       function getSeries(negativeOnly) {
         if (!negativeOnly) return { labels: allLabels, values: allValues };
@@ -150,10 +181,10 @@
         return { labels, values };
       }
 
-      const ctx = document.getElementById("trendChart").getContext("2d");
-
+      const trendCtx = document.getElementById("trendChart").getContext("2d");
       const initial = getSeries(false);
-      const chart = new Chart(ctx, {
+
+      const chart = new Chart(trendCtx, {
         type: "line",
         data: {
           labels: initial.labels,
@@ -188,6 +219,42 @@
         chart.data.labels = series.labels;
         chart.data.datasets[0].data = series.values;
         chart.update();
+      });
+
+      const catCtx = document.getElementById("categoryChart").getContext("2d");
+      const categoryColors = [
+        "#2f6fed", "#7fb3ff", "#63c29b", "#9aa4b2", "#c6cbd3",
+        "#f2c94c", "#eb5757", "#bb6bd9", "#56ccf2", "#27ae60"
+      ];
+
+      new Chart(catCtx, {
+        type: "doughnut",
+        data: {
+          labels: categoryLabels,
+          datasets: [{
+            data: categoryValues,
+            backgroundColor: categoryLabels.map((_, i) => categoryColors[i % categoryColors.length]),
+            borderColor: "rgba(255,255,255,0.9)",
+            borderWidth: 2,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const label = ctx.label || "Category";
+                  const value = Number(ctx.raw || 0);
+                  return `${label}: ${value.toFixed(2)}`;
+                }
+              }
+            }
+          },
+          cutout: "62%"
+        }
       });
     </script>
   {% else %}
