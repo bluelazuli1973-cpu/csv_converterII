@@ -47,6 +47,12 @@ def upload_post():
 
     txs = []
     for _, r in df.iterrows():
+        category = None
+        if "category" in df.columns:
+            category = str(r["category"]).strip()
+            if category == "":
+                category = None
+
         txs.append(
             Transaction(
                 currency=str(r["currency"]).strip() if str(r["currency"]).strip() != "" else None,
@@ -56,6 +62,7 @@ def upload_post():
                 description=str(r["description"]).strip() if str(r["description"]).strip() != "" else None,
                 amount=float(r["amount"]),
                 is_expense=bool(r["is_expense"]),
+                category=category or "Uncategorized",
                 upload_id=upload_row.id,
             )
         )

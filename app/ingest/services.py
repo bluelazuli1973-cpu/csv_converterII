@@ -4,6 +4,9 @@ import os
 import pandas as pd
 from app.ingest.flexible_csv_reader_utility import read_whole_line_quoted_csv, normalize_columns, clean_data
 
+from app.ai_agent_models import ensure_category_model
+import joblib
+
 
 REQUIRED_COLUMNS = ["date", "metric", "value"]
 
@@ -25,6 +28,36 @@ FIELD_MAPPING = {
     'reference': ['reference', 'ref', 'reference_number','Referens'],
     'description': ['description', 'Beskrivning', 'description_of_transaction']
 }
+
+_CATEGORY_MODEL = None
+
+
+def _load_category_model():
+    """
+    Loads the trained sklearn Pipeline used for category prediction.
+    Cached in-process so we don't reload the model on every request.
+    """
+    global _CATEGORY_MODEL
+    if _CATEGORY_MODEL is not None:
+        return _CATEGORY_MODEL
+
+    model_path = ensure_category_model()
+    # ensure_category_model() returns the preferred .joblib path; if your training code
+    # ever falls back to .pkl, it should still be loadable by joblib as well.
+    _CATEGORY_MODEL = joblib.load(model_path)
+    return _CATEGORY_MODEL
+
+
+def _build_category_text(df: pd.DataFrame) -> pd.Series:
+    """
+    Build the text input expected by the trained model.
+    Keep it simple and robust: concatenate description + reference.
+    """
+    desc = df.get("description", pd.Series([""] * len(df), index=df.index)).fillna("").astype(str)
+    ref = df.get("reference", pd.Series([""] * len(df), index=df.index)).fillna("").astype(str)
+    text = (desc.str.strip() + " " + ref.str.strip()).str.strip()
+    return text
+
 
 def _parse_swedish_number(x) -> float | None:
     """
@@ -50,6 +83,7 @@ def _parse_swedish_number(x) -> float | None:
         raise ValueError(f"Invalid number: {x!r}")
     return float(s)
 
+
 def derive_transaction_fields(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add derived transaction fields used by the app/db.
@@ -57,6 +91,10 @@ def derive_transaction_fields(df: pd.DataFrame) -> pd.DataFrame:
     Option A:
       - keep df["amount"] signed
       - expense if amount < 0, otherwise income
+
+    Also derives:
+      - category (predicted by trained model)
+      - category_confidence (max probability, if model supports predict_proba)
 
     Returns a new DataFrame (does not mutate the caller's df).
     """
@@ -69,7 +107,24 @@ def derive_transaction_fields(df: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Cannot derive fields: column 'amount' contains empty/invalid values.")
 
     df["is_expense"] = df["amount"] < 0
+
+    # --- category prediction ---
+    # Requires at least one text field to be present; we can still run with blanks,
+    # but you'll likely want description/reference in your input CSV.
+    texts = _build_category_text(df)
+
+    model = _load_category_model()
+    df["category"] = model.predict(texts.tolist())
+
+    # Optional confidence if supported by the sklearn estimator
+    if hasattr(model, "predict_proba"):
+        proba = model.predict_proba(texts.tolist())
+        df["category_confidence"] = proba.max(axis=1)
+    else:
+        df["category_confidence"] = pd.NA
+
     return df
+
 
 def parse_csv_to_dataframe(file_storage) -> pd.DataFrame:
     """

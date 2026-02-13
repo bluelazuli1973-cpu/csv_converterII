@@ -30,6 +30,7 @@ def trend():
         db.select(
             Transaction.transaction_day,
             Transaction.place_purchase,
+            Transaction.category,
             Transaction.amount,
         )
         .where(Transaction.transaction_day.isnot(None))

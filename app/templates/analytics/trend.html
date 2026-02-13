@@ -105,14 +105,16 @@
                       <tr>
                         <th>Date</th>
                         <th>Place</th>
+                        <th>Category</th>
                         <th class="text-end">Amount</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {% for day, place, amount in tx_rows %}
+                      {% for day, place, category, amount in tx_rows %}
                         <tr>
                           <td>{{ day }}</td>
                           <td>{{ place or "" }}</td>
+                          <td>{{ category or "Uncategorized" }}</td>
                           <td class="text-end">{{ "%.2f"|format(amount) }}</td>
                         </tr>
                       {% endfor %}
