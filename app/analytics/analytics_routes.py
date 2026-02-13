@@ -1,8 +1,10 @@
+from datetime import datetime, timezone
+
 from flask import Blueprint, render_template, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from ..extensions import db
-from ..models import Transaction
+from ..models import MonthlyBudget, Transaction
 
 analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 
@@ -33,6 +35,17 @@ def trend():
     category_labels = []
     category_values = []
     top_category = ""
+
+    # Current month budget for this user (if defined)
+    now = datetime.now(timezone.utc)
+    mb_amount = db.session.execute(
+        db.select(MonthlyBudget.amount).where(
+            MonthlyBudget.user_id == current_user.id,
+            MonthlyBudget.year == now.year,
+            MonthlyBudget.month == now.month,
+        )
+    ).scalar_one_or_none()
+    monthly_budget = float(mb_amount) if mb_amount is not None else None
 
     # Categories for dropdown (unfiltered so you can always switch)
     # NOTE: Never include financial transactions in this view.
@@ -147,4 +160,5 @@ def trend():
         end_date=end_date.isoformat() if end_date else "",
         total_spending=float(total_spending or 0.0),
         top_category=top_category,
+        monthly_budget=monthly_budget,
     )

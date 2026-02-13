@@ -13,8 +13,10 @@
         <div class="ui-card stat-card">
           <div class="stat-icon">💳</div>
           <div>
-            <p class="stat-label">Total Spending</p>
-            <p class="stat-value mb-0">{{ "%.2f"|format(total_spending or 0) }}</p>
+            <p class="stat-label">Total Spending (SEK)</p>
+            <p class="stat-value mb-0">
+              {{ "{:,.0f}".format(total_spending or 0).replace(",", " ") }}
+            </p>
           </div>
         </div>
       </div>
@@ -22,8 +24,14 @@
         <div class="ui-card stat-card">
           <div class="stat-icon">📅</div>
           <div>
-            <p class="stat-label">Monthly Budget</p>
-            <p class="stat-value mb-0">—</p>
+            <p class="stat-label">Monthly Budget (SEK)</p>
+            <p class="stat-value mb-0">
+                {% if monthly_budget is not none %}
+                  {{ "{:,.0f}".format(monthly_budget).replace(",", " ") }}
+                {% else %}
+                  —
+                {% endif %}
+            </p>
           </div>
         </div>
       </div>
@@ -41,7 +49,20 @@
           <div class="stat-icon">📈</div>
           <div>
             <p class="stat-label">This Month’s Savings</p>
-            <p class="stat-value mb-0">—</p>
+            <p class="stat-value mb-0
+              {% if monthly_budget is not none and (monthly_budget - (total_spending or 0)) < 0 %}
+                text-danger
+              {% elif monthly_budget is not none %}
+                text-primary
+              {% endif %}
+            ">
+              {% if monthly_budget is not none %}
+                {% set savings = monthly_budget - (total_spending or 0) %}
+                {{ "{:,.0f}".format(savings).replace(",", " ") }}
+              {% else %}
+                —
+              {% endif %}
+            </p>
           </div>
         </div>
       </div>
