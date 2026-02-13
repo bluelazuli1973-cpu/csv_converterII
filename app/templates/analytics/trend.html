@@ -53,15 +53,6 @@
           <div class="section-title">Spending Trend</div>
           <div class="kicker">Total amount per day (transaction date)</div>
         </div>
-
-        <div class="d-flex align-items-center gap-2">
-          <div class="form-check mb-0">
-            <input class="form-check-input" id="negOnlyToggle" type="checkbox" />
-            <label class="form-check-label" for="negOnlyToggle">
-              Display negative only
-            </label>
-          </div>
-        </div>
       </div>
 
       <div class="ui-card-body">
@@ -168,29 +159,15 @@
       const categoryLabels = {{ category_labels | tojson }};
       const categoryValues = {{ category_values | tojson }};
 
-      function getSeries(negativeOnly) {
-        if (!negativeOnly) return { labels: allLabels, values: allValues };
-        const labels = [];
-        const values = [];
-        for (let i = 0; i < allValues.length; i++) {
-          if (Number(allValues[i]) < 0) {
-            labels.push(allLabels[i]);
-            values.push(allValues[i]);
-          }
-        }
-        return { labels, values };
-      }
-
       const trendCtx = document.getElementById("trendChart").getContext("2d");
-      const initial = getSeries(false);
 
       const chart = new Chart(trendCtx, {
         type: "line",
         data: {
-          labels: initial.labels,
+          labels: allLabels,
           datasets: [{
             label: "Total amount",
-            data: initial.values,
+            data: allValues,
             borderWidth: 3,
             tension: 0.35,
             pointRadius: 2,
@@ -211,14 +188,6 @@
             y: { beginAtZero: false }
           }
         }
-      });
-
-      const toggle = document.getElementById("negOnlyToggle");
-      toggle.addEventListener("change", () => {
-        const series = getSeries(toggle.checked);
-        chart.data.labels = series.labels;
-        chart.data.datasets[0].data = series.values;
-        chart.update();
       });
 
       const catCtx = document.getElementById("categoryChart").getContext("2d");
