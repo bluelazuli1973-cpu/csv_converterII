@@ -11,12 +11,16 @@ analytics_bp = Blueprint("analytics", __name__, url_prefix="/analytics")
 @login_required
 def trend():
     # Daily totals over transaction date
+    # display spending as positive
     per_day_rows = db.session.execute(
         db.select(
             Transaction.transaction_day,
-            db.func.sum(Transaction.amount).label("total"),
+            db.func.sum(-Transaction.amount).label("total"),
         )
-        .where(Transaction.transaction_day.isnot(None))
+        .where(
+            Transaction.transaction_day.isnot(None),
+            Transaction.is_expense.is_(True),
+        )
         .group_by(Transaction.transaction_day)
         .order_by(Transaction.transaction_day.asc())
     ).all()
