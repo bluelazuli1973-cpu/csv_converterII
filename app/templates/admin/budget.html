@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex align-items-end justify-content-between mb-3">
+    <div>
+      <h1 class="page-title mb-1">Monthly Budget</h1>
+      <div class="kicker">Set your budget per month (saved to your account)</div>
+    </div>
+  </div>
+
+  <div class="ui-card mb-3">
+    <div class="ui-card-body">
+      <form method="post" action="{{ url_for('admin.budget_post') }}" class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Month</label>
+          <input name="month" type="month" class="form-control" value="{{ selected_month }}" required>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label">Budget amount</label>
+          <input name="amount" type="number" step="0.01" min="0" class="form-control" value="{{ current_amount }}" placeholder="e.g. 2500.00" required>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <button class="btn btn-primary w-100" type="submit">Save Budget</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="ui-card">
+    <div class="ui-card-header">
+      <div class="section-title">Recent budgets</div>
+      <div class="kicker">Last 12 saved months</div>
+    </div>
+    <div class="ui-card-body">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th class="text-end">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in recent_budgets %}
+              <tr>
+                <td>{{ "%04d-%02d"|format(b.year, b.month) }}</td>
+                <td class="text-end">{{ "%.2f"|format(b.amount) }}</td>
+              </tr>
+            {% endfor %}
+            {% if not recent_budgets %}
+              <tr>
+                <td colspan="2" class="kicker">No budgets saved yet.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

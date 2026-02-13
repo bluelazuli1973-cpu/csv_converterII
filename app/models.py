@@ -13,6 +13,12 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     uploads = db.relationship("Upload", back_populates="user", cascade="all, delete-orphan")
+    monthly_budgets = db.relationship(
+        "MonthlyBudget",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="(MonthlyBudget.year.desc(), MonthlyBudget.month.desc())",
+    )
 
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
@@ -37,8 +43,6 @@ class Upload(db.Model):
     user = db.relationship("User", back_populates="uploads")
 
     transactions = db.relationship("Transaction", back_populates="upload", cascade="all, delete-orphan")
-
-
 
 
 class Transaction(db.Model):
@@ -72,3 +76,30 @@ class Transaction(db.Model):
 
     upload_id = db.Column(db.Integer, db.ForeignKey("uploads.id"), nullable=False, index=True)
     upload = db.relationship("Upload", back_populates="transactions")
+
+
+class MonthlyBudget(db.Model):
+    __tablename__ = "monthly_budgets"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    user = db.relationship("User", back_populates="monthly_budgets")
+
+    year = db.Column(db.Integer, nullable=False, index=True)
+    month = db.Column(db.Integer, nullable=False, index=True)  # 1..12
+
+    # Use Numeric to avoid float rounding for money
+    amount = db.Column(db.Numeric(12, 2), nullable=False)
+
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "year", "month", name="uq_user_budget_month"),
+    )
